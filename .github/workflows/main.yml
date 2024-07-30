@@ -4,6 +4,7 @@ on:
     push:
         branches: ['main']
 env:
+    RUNNER_VERSION: v2.318.0
     GITHUB_REGISTRY: ghcr.io
     DOCKER_IMAGE: ${{ github.repository }}
 
@@ -23,17 +24,22 @@ jobs:
                 registry: ${{ env.GITHUB_REGISTRY }}
                 username: ${{ github.actor }}
                 password: ${{ secrets.GITHUBTOKEN }}
+            - name: Build the Dockerfile
+              run: docker build -t ghcr.io/anilnair00/winrunner:${{ github.ref_name }} --build-arg RUNNER_VERSION=${{env.RUNNER_VERSION}} .
+        
+            - name: Push to GitHub Container Registry
+              run: docker push ghcr.io/anilnair00/winrunner:${{ github.ref_name }}
+        
+            # - name: extract the metadata (tags, labels)
+            #   id: meta
+            #   uses: docker/metadata-action@v5
+            #   with:
+            #     images: ${{ env.GITHUB_REGISTRY }}/${{ env.DOCKER_IMAGE }}      
                 
-            - name: extract the metadata (tags, labels)
-              id: meta
-              uses: docker/metadata-action@v5
-              with:
-                images: ${{ env.GITHUB_REGISTRY }}/${{ env.DOCKER_IMAGE }}      
-                
-            - name: build-push-docker-image
-              uses: docker/setup-buildx-action@v1
-              with:
-                context: ./file
-                push: true
-                tags: ${{ steps.meta.outputs.tags }}
-                labels: ${{ steps.meta.outputs.labels }}
+            # - name: build-push-docker-image
+            #   uses: docker/setup-buildx-action@v1
+            #   with:
+            #     context: ./file
+            #     push: true
+            #     tags: ${{ steps.meta.outputs.tags }}
+            #     labels: ${{ steps.meta.outputs.labels }}
