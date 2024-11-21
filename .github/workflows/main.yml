@@ -1,7 +1,7 @@
 name: build-and-push-docker-image
 
 on:
-    push:
+    pull_request:
         branches: ['main']
 env:
     RUNNER_VERSION: v2.318.0
